@@ -122,8 +122,14 @@ const BasicGroupChannel = (props) => {
 
   // 另外一个 event listener
   useEffect(() => {
-    scrollToBottom(channelRef.current, 'smooth')
+    scrollToBottom(channelRef.current, 'smooth');
   }, [state.messages]);
+
+  // 处理 error，并加入到 state 中，在这里没有通过 ref 操作
+  const onError = (error) => {
+    updateState({ ...state, error: error.message });
+    console.log(error.message);
+  };
 
   return <div>BasicGroupChannel</div>;
 };
