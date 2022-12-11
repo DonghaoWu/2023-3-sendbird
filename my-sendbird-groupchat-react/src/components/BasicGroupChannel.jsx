@@ -105,6 +105,14 @@ const BasicGroupChannel = (props) => {
     onHugeGapDetected: () => {},
   };
 
+  // 可能是一个按钮，可以直接跳转到页面底部，具体未清楚如何使用
+  const scrollToBottom = (item, smooth) => {
+    item?.scrollTo({
+      top: item.scrollHeight,
+      behavior: smooth,
+    });
+  };
+
   return <div>BasicGroupChannel</div>;
 };
 
