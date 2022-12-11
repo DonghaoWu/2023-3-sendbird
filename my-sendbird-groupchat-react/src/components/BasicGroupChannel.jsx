@@ -1,5 +1,9 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import {
+  MessageFilter,
+  MessageCollectionInitPolicy,
+} from '@sendbird/chat/groupChannel';
 
 const BasicGroupChannel = (props) => {
   const [state, updateState] = useState({
@@ -186,6 +190,32 @@ const BasicGroupChannel = (props) => {
   };
 
   return <div>BasicGroupChannel</div>;
+};
+
+// 定义 loadMessages，可以看到它是在 component 之外的，也就是说是一个 helper function
+// 不对 state 有影响，也不会re-render
+const loadMessages = (channel, messageHandlers, onCacheResult, onApiResult) => {
+  // MessageFilter 是 sendBird 自带的函数
+  const messageFilter = new MessageFilter();
+  // 有 1 个未知函数，分别是
+  // createMessageCollection， 应该是 channel 自带的 sendbird 的函数
+  const collection = channel.createMessageCollection({
+    filter: messageFilter,
+    startingPoint: Date.now(),
+    limit: 100, // 这是在限制什么？
+  });
+
+  // setMessageCollectionHandler 是 sendbird 的另一个 api 函数
+  collection.setMessageCollectionHandler(messageHandlers);
+
+  // initialize / onCacheResult / onApiResult 都是 sendbird 的函数
+  // MessageCollectionInitPolicy 直接引用 sendbird
+  collection
+    .initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
+    .onCacheResult(onCacheResult)
+    .onApiResult(onApiResult);
+  // 这个函数返回一个 collection 放在 state 的 messageCollection 里面，不知道作用是什么。
+  return collection;
 };
 
 // function TextInputWithFocusButton() {
