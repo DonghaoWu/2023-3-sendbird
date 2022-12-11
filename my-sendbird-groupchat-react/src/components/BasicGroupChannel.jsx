@@ -131,6 +131,60 @@ const BasicGroupChannel = (props) => {
     console.log(error.message);
   };
 
+  // 关于 channel 的 api 操作，也是没有同过 ref 来操作
+  // 使用 async 的原因是 updateState 是一个 async 动作？
+  const handleJoinChannel = async (channelUrl) => {
+    // 未知有什么作用
+    if (state.messageCollection && state.messageCollection.dispose) {
+      state.messageCollection?.dispose();
+    }
+
+    // 如果用户最近已经加入了该 channel，则不需要做任何动作
+    // 这种情况主要是防止用户重复加入 channel
+    if (state.currentlyJoinedChannel?.url === channelUrl) {
+      return null;
+    }
+
+    const { channels } = state;
+    // 不通过 ref，而是通过 loading 来决定是不是加载情况
+    updateState({ ...state, loading: true });
+    // 在所有 channel 中找出想要加入的 channel，所以所有 channel 包括已加入的还有未加入的
+    const channel = channels.find((channel) => channel.url === channelUrl);
+
+    // 定义 onCacheResult，主要是用来在 join channel 的时候改变 state，
+    const onCacheResult = (err, messages) => {
+      updateState({
+        ...stateRef.current,
+        currentlyJoinedChannel: channel,
+        messages: messages.reverse(),
+        loading: false,
+      });
+    };
+
+    // 定义 onApiResult，未知作用，但代码跟上面 onCacheResult 一样
+    const onApiResult = (err, messages) => {
+      updateState({
+        ...stateRef.current,
+        currentlyJoinedChannel: channel,
+        messages: messages.reverse(),
+        loading: false,
+      });
+    };
+
+    // 不知道 loadMessges 的作用
+    const collection = loadMessages(
+      channel, // 将要加入的 channel
+      messageHandlers, // 上面已经定义的 messageHandlers
+      onCacheResult,
+      onApiResult
+    );
+
+    // 需要注意的是，现在还不知道 loadMessges 的作用，
+    // 也不知道 messageCollection 的角色
+    // 还有，loading 在设为 true 之后没有看到语句设定回 false
+    updateState({ ...state, messageCollection: collection });
+  };
+
   return <div>BasicGroupChannel</div>;
 };
 
