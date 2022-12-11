@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const BasicGroupChannel = (props) => {
   const [state, updateState] = useState({
@@ -112,6 +112,18 @@ const BasicGroupChannel = (props) => {
       behavior: smooth,
     });
   };
+
+  // 只有当 state.currentlyJoinedChannel 改变的时候才运行 scrollToBottom
+  // 这里说的意思是如果一个用户新加入 channel，会自动引导至最低端
+  // 那么 channelRef.current 的值是在哪里加入的呢？
+  useEffect(() => {
+    scrollToBottom(channelRef.current);
+  }, [state.currentlyJoinedChannel]);
+
+  // 另外一个 event listener
+  useEffect(() => {
+    scrollToBottom(channelRef.current, 'smooth')
+  }, [state.messages]);
 
   return <div>BasicGroupChannel</div>;
 };
